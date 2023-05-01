@@ -1,47 +1,51 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Security.Cryptography;
-using System.Threading;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
-    float speed; // for the enemy speed
-    
+    private float speed = 2f;
+    private bool hit = false;
+
+    // private Vector3 baseLocation = new Vector3(0f, 7.18f, 0f);
+
+    // Start is called before the first frame update
     void Start()
     {
-        speed = 2f;//set speed
+        // transform.position = baseLocation;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Get the enemy current position
-        Vector2 position = transform.position;
+        transform.Translate(speed * Time.deltaTime * Vector3.down);
 
-        //Compute the enemy new position
-        position = new Vector2 (position.x, position.y - speed * Time.deltaTime);
-
-        //Update the enemy position
-        transform.position = position;
-
-        //this is the bottom-left point of the screen
-        Vector2 min = Camera.main.ViewportToWorldPoint(new Vector2(0, 0));
-
-        //if the enemy went outisde the screen on the bottom, then destroy the enemy
-        if(transform.position.y < min.y)
+        if (transform.position.y < -5f)
         {
             Destroy(gameObject);
         }
     }
 
-    void OnCollisionEnter2D (Collision2D col)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (col.gameObject.tag.Equals ("Projectile"))
+        if (!hit)
         {
-            Destroy(col.gameObject);
-            Destroy(gameObject);
+            if (other.gameObject.tag == "Bullet")
+            {
+                hit = true;
+                GameObject.Find("GameManager").GetComponent<GameManager>().SetPlayerPoints(1);
+                Destroy(other.gameObject);
+                Destroy(gameObject);
+            }
+            else if (other.gameObject.tag == "Player")
+            {
+                other.gameObject.GetComponent<PlayerController>().EnemyDamage();
+            }
         }
+    }
+
+    public void SetSpeed(float speed)
+    {
+        this.speed = speed;
     }
 }

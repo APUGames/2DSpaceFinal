@@ -1,20 +1,34 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Weapon : MonoBehaviour
 {
-    public GameObject bulletPrefab;
-    public Transform firePoint;
-    public float fireForce = 20f;
+    // This script will handle a laser's position and movement when spawned
 
+    private Vector3 endTranslationPosition;
 
-    public void Fire()
+    private float speed = 4f;
+
+    // Start is called before the first frame update
+    void Start()
     {
-        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * fireForce, ForceMode2D.Impulse);
+        // Destroy(gameObject, timeToDestroy);
+        // endTranslationPosition = new Vector3(transform.position.x, transform.position.y + 20f, 0f);
     }
 
+    // Update is called once per frame
+    void Update()
+    {
+        // StartCoroutine(TranslateOverTime(transform, endTranslationPosition, speed));
+        transform.Translate(speed * Time.deltaTime * Vector3.up);
 
+        if (transform.position.y > 8.65f)
+        {
+            Destroy(gameObject);
+        }
+    }
+    
 }

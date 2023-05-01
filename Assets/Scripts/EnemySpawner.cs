@@ -6,66 +6,49 @@ using Random = UnityEngine.Random;
 
 public class EnemySpawner : MonoBehaviour
 {
-    public GameObject Enemy; // this is the enemy prefab
+    public GameObject enemyPrefab;
 
-    float maxSpawnRateInSeconds = 5f;
+    public string debugName;
 
+    public Vector3[] spawnPoints;
+
+    [SerializeField]
+    private float queueTime = 2.0f;
+    private float currentQueueTime;
+
+    [SerializeField]
+    private float speed = 1.0f;
+
+    // Start is called before the first frame update
     void Start()
     {
-        Invoke ("SpawnEnemy", maxSpawnRateInSeconds);
-
-        //Increase spawn rate every 30 seconds
-        InvokeRepeating("IncreaseSpawnRAte", 0f, 30f);
+        currentQueueTime = queueTime;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-    }
+        GameManager gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
 
-    // Function to spawn an enemy
-    void SpawnEnemy()
-    {
-        //this is the bottom left point of the screen
-        Vector2 min = Camera.main.ViewportToWorldPoint(new Vector2 (0, 0));
-
-        //this is the top right point of the screen
-        Vector2 max = Camera.main.ViewportToWorldPoint(new Vector2 (1, 1));
-
-        //Instantiate an enemy
-        GameObject anEnemy = (GameObject)Instantiate(Enemy);
-        anEnemy.transform.position = new Vector2(Random.Range (min.x, max.x), max.y);
-
-        //Schedule when to spawn next enemy
-        ScheduleNextEnemySpawn ();
-    }
-
-    void ScheduleNextEnemySpawn()
-    {
-        float spawnInNSeconds;
-
-        if (maxSpawnRateInSeconds > 1f)
+        if (currentQueueTime < 0f)
         {
-            //pick a number between 1 and maxSpawnRAteINSeconds
-            spawnInNSeconds = Random.Range(1f, maxSpawnRateInSeconds);
+            // Debug.Log(debugName + " " + transform.position);
+            int spawnLocationIndex = Random.Range(0, spawnPoints.Length);
+            Vector3 spawnLocation = spawnPoints[spawnLocationIndex];
+            GameObject enemy = Instantiate(enemyPrefab, spawnLocation, Quaternion.identity);
+            enemy.GetComponent<EnemyController>().SetSpeed(speed);
+            currentQueueTime = queueTime;
         }
         else
-            spawnInNSeconds = 1f;
-
-        Invoke ("SpawnEnemy", spawnInNSeconds);
+        {
+            currentQueueTime -= Time.deltaTime;
+        }
     }
 
-    //Function to increase the difficulty of the game
-    void IncreaseSpawnRate()
+    int numberOfEnemies = 10;
+
+    public int GetNumberOfEnemies()
     {
-        if(maxSpawnRateInSeconds > 1f)
-            maxSpawnRateInSeconds--;
-
-        if(maxSpawnRateInSeconds == 1f)
-            CancelInvoke("IncreaseSpawnRate");
+        return numberOfEnemies;
     }
-   
-
-
 }
